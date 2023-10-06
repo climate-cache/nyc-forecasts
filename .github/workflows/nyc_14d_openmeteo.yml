@@ -1,0 +1,78 @@
+name: NYC 14-Day ( Hourly )
+
+on:
+  schedule:
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install pytz
+      run: |
+        pip install pytz
+        
+    - name: Generate Metadata
+      id: metagen
+      run: |
+        python -c "from datetime import datetime, timedelta
+        from pytz import timezone
+        zone = timezone('US/Eastern')
+        now = datetime.now(tz=zone).replace(minute=0, second=0, microsecond=0)
+        target = now + timedelta(days=14)
+
+        fname = now.strftime('%Y-%m-%d_%H:%M')
+        nowstring = now.strftime('%Y-%m-%d') + ' - ' + target.strftime('%Y-%m-%d')
+        timestr = '14-Day Forecast from ' + now.strftime('%Y-%m-%d') + ' at ' + now.strftime('%H:%M')
+        month = str(now.strftime('%m'))
+        day = str(now.strftime('%d'))
+        year = str(now.strftime('%Y'))
+
+        print(f'::set-output name=fname::{fname}')
+        print(f'::set-output name=timestr::{timestr}')
+        print(f'::set-output name=month::{month}')
+        print(f'::set-output name=day::{day}')
+        print(f'::set-output name=year::{year}')"
+
+    - name: Check Directory
+      run: |
+        mkdir -p $YEAR/$MONTH/$DAY
+      env:
+        YEAR: ${{ steps.metagen.outputs.year }}
+        MONTH: ${{ steps.metagen.outputs.month }}
+        DAY: ${{ steps.metagen.outputs.day }}
+        
+    - name: Download JSON
+      run: |
+        curl -o $YEAR/$MONTH/$DAY/$FILENAME.json "https://api.open-meteo.com/v1/forecast?latitude=$LAT&longitude=$LON&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,rain,showers,snowfall,surface_pressure,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=14"
+      env:
+        LAT: 40.71033
+        LON: -73.99307
+        YEAR: ${{ steps.metagen.outputs.year }}
+        MONTH: ${{ steps.metagen.outputs.month }}
+        DAY: ${{ steps.metagen.outputs.day }}
+        FILENAME: ${{ steps.metagen.outputs.fname }}
+        
+    - name: Commit Changes
+      run: |
+        git config user.name 'Climate-Vault'
+        git config user.email 'climatevault@gmail.com'
+        git add "$YEAR/$MONTH/$DAY/$FILENAME.json"
+        git commit -m "${{ steps.metagen.outputs.timestr }}"
+        git push https://github.com/climate-vault/nyc-forecasts.git HEAD:main
+      env:
+        GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
+        YEAR: ${{ steps.metagen.outputs.year }}
+        MONTH: ${{ steps.metagen.outputs.month }}
+        DAY: ${{ steps.metagen.outputs.day }}
+        FILENAME: ${{ steps.metagen.outputs.fname }}
