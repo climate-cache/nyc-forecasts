@@ -1,0 +1,35 @@
+name: Forecast Rename
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rename_files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Rename Files
+        run: |
+          python -c "import os
+          repo_directory = os.environ['GITHUB_WORKSPACE']
+          for filename in os.listdir(directory):
+                  if ':' in filename:
+                      new_filename = filename.replace(':', '')
+                      os.rename(os.path.join(directory, filename), os.path.join(directory, new_filename))"
+  
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.email "climatevault@gmail.com"
+          git config --global user.name "climate-vault"
+          git add .
+          git commit -m "Remove colons from file names"
+          git push origin HEAD:main
+        env:
+          GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
