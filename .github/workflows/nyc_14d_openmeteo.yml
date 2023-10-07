@@ -2,7 +2,7 @@ name: NYC 14-Day ( Hourly )
 
 on:
   schedule:
-    - cron: '0 */1 * * *'
+    - cron: '1 */1 * * *'
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
         now = datetime.now(tz=zone).replace(minute=0, second=0, microsecond=0)
         target = now + timedelta(days=14)
 
-        fname = now.strftime('%Y-%m-%d_%H:%M')
+        fname = now.strftime('%Y-%m-%d_%H%M')
         nowstring = now.strftime('%Y-%m-%d') + ' - ' + target.strftime('%Y-%m-%d')
         timestr = '14-Day Forecast from ' + now.strftime('%Y-%m-%d') + ' at ' + now.strftime('%H:%M')
         month = str(now.strftime('%m'))
