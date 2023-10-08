@@ -9,6 +9,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      YEAR: ${{ steps.metagen.outputs.year }}
+      MONTH: ${{ steps.metagen.outputs.month }}
+      DAY: ${{ steps.metagen.outputs.day }}
+      FILENAME: ${{ steps.metagen.outputs.fname }}
+      TIMEZONE: "US/Eastern"
+      GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
+      GIT_BRANCH: "branch-rewrite"
+      LAT: 40.71033
+      LON: -73.99307
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -27,19 +38,19 @@ jobs:
       run: |
         python -c "from datetime import datetime, timedelta
         from pytz import timezone
-        zone = timezone('US/Eastern')
+        zone = timezone('$TIMEZONE')
         now = datetime.now(tz=zone).replace(minute=0, second=0, microsecond=0)
         target = now + timedelta(days=14)
 
         fname = now.strftime('%Y-%m-%d_%H%M')
         nowstring = now.strftime('%Y-%m-%d') + ' - ' + target.strftime('%Y-%m-%d')
-        timestr = '14-Day Forecast from ' + now.strftime('%Y-%m-%d') + ' at ' + now.strftime('%H:%M')
+        commit_text = '14-Day Forecast from ' + now.strftime('%Y-%m-%d') + ' at ' + now.strftime('%H:%M')
         month = str(now.strftime('%m'))
         day = str(now.strftime('%d'))
         year = str(now.strftime('%Y'))
 
         print(f'::set-output name=fname::{fname}')
-        print(f'::set-output name=timestr::{timestr}')
+        print(f'::set-output name=commit_text::{commit_text}')
         print(f'::set-output name=month::{month}')
         print(f'::set-output name=day::{day}')
         print(f'::set-output name=year::{year}')"
@@ -47,32 +58,15 @@ jobs:
     - name: Check Directory
       run: |
         mkdir -p $YEAR/$MONTH/$DAY
-      env:
-        YEAR: ${{ steps.metagen.outputs.year }}
-        MONTH: ${{ steps.metagen.outputs.month }}
-        DAY: ${{ steps.metagen.outputs.day }}
         
     - name: Download JSON
       run: |
         curl -o $YEAR/$MONTH/$DAY/$FILENAME.json "https://api.open-meteo.com/v1/forecast?latitude=$LAT&longitude=$LON&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,rain,showers,snowfall,surface_pressure,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=14"
-      env:
-        LAT: 40.71033
-        LON: -73.99307
-        YEAR: ${{ steps.metagen.outputs.year }}
-        MONTH: ${{ steps.metagen.outputs.month }}
-        DAY: ${{ steps.metagen.outputs.day }}
-        FILENAME: ${{ steps.metagen.outputs.fname }}
         
     - name: Commit Changes
       run: |
         git config user.name 'Climate-Vault'
         git config user.email 'climatevault@gmail.com'
-        git add "$YEAR/$MONTH/$DAY/$FILENAME.json"
-        git commit -m "${{ steps.metagen.outputs.timestr }}"
-        git push https://github.com/climate-vault/nyc-forecasts.git HEAD:main
-      env:
-        GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
-        YEAR: ${{ steps.metagen.outputs.year }}
-        MONTH: ${{ steps.metagen.outputs.month }}
-        DAY: ${{ steps.metagen.outputs.day }}
-        FILENAME: ${{ steps.metagen.outputs.fname }}
+        git add .
+        git commit -m "$COMMIT_TEXT"
+        git push origin HEAD:$GIT_BRANCH
