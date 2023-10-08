@@ -1,7 +1,9 @@
 name: NYC 14-Day ( Hourly / Test )
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - "workflow-rewrite"
 
 jobs:
   build:
