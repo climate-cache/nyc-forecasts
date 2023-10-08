@@ -1,4 +1,4 @@
-name: NYC 14-Day ( Hourly )
+name: NYC 14-Day ( Hourly / Test )
 
 on:
   #schedule:
