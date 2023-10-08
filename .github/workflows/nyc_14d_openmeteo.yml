@@ -16,7 +16,7 @@ jobs:
       FILENAME: ${{ steps.metagen.outputs.fname }}
       TIMEZONE: "US/Eastern"
       GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
-      GIT_BRANCH: "branch-rewrite"
+      GIT_BRANCH: "workflow-rewrite"
       LAT: 40.71033
       LON: -73.99307
 
