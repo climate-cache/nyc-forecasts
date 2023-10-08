@@ -1,8 +1,6 @@
 name: NYC 14-Day ( Hourly / Test )
 
 on:
-  #schedule:
-  #  - cron: '1 */1 * * *'
   workflow_dispatch:
 
 jobs:
