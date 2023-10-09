@@ -65,11 +65,11 @@ jobs:
         
     - name: Commit Changes
       run: |
-        git config user.name 'Climate-Vault'
-        git config user.email 'climatevault@gmail.com'
+        git config user.name 'Climate-Cache'
+        git config user.email 'theclimatecache@gmail.com'
         git add "$YEAR/$MONTH/$DAY/$FILENAME.json"
         git commit -m "${{ steps.metagen.outputs.timestr }}"
-        git push https://github.com/climate-vault/nyc-forecasts.git HEAD:main
+        git push https://github.com/climate-cache/nyc-forecasts.git HEAD:main
       env:
         GIT_SSH_KEY: ${{ secrets.PAT_TOKEN }}
         YEAR: ${{ steps.metagen.outputs.year }}
