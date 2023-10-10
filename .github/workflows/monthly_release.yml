@@ -1,0 +1,73 @@
+name: NYC Monthly Release
+
+on:
+  workflow_dispatch:
+  #schedule:
+  #  - cron: '1 5 1 * *'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Python Setup
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dateutils
+      run: |
+        pip install python-dateutil
+        
+    - name: Generate Metadata
+      id: metagen
+      run: |
+        python -c "from datetime import datetime, timedelta
+        from dateutil.relativedelta import relativedelta
+        lastmonth = datetime.now() - relativedelta(months=1)
+        year = lastmonth.year
+        month = lastmonth.month
+
+        fname = str(year) '-' str(month) + '_Forecasts.zip)
+        tag = str(year) + '.' + str(month)
+        note = 'Forecasts for: ' + lastmonth.strftime('%B') + ', ' + str(year)
+        monthstr = str(month)
+        yearstr = str(year)
+        data_directory = os.environ['GITHUB_WORKSPACE'] + '/' + yearstr + '/' + monthstr + '/'
+        zipout = data_directory + fname
+
+        print(f'::set-output name=fname::{fname}')
+        print(f'::set-output name=timestr::{timestr}')
+        print(f'::set-output name=tag::{tag}')
+        print(f'::set-output name=monthstr::{monthstr}')
+        print(f'::set-output name=yearstr::{yearstr}')
+        print(f'::set-output name=datadir::{data_directory}')
+        print(f'::set-output name=zipout::{zipout}')"
+
+    - name: Zip Data
+      run: |
+        python -c "from zipfile import ZipFile
+        import os
+        def zip_directory(directory, zip_name)
+              with ZipFile(zip_name, 'w', compression=ZipFile.ZIP_DEFLATED) as zipf
+                    for foldername, subfolders, filenames in os.walk(directory):
+                          for filename in filenames:
+                                file_path = os.path.join(foldername, filename)
+                                relative_path = os.path.relpath(file_path, directory)
+                                zipf.write(file_path, relative_path)
+
+        zipdir = '${{ steps.metagen.outputs.datadir }}'
+        zipout = '${{ steps.metagen.outputs.zipout }}'
+        "
+        
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: $FILEDIR
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        FILEDIR: ${{ steps.metagen.outputs.zipout }}
