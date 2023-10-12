@@ -2,12 +2,14 @@
 
 ![weather workflow](https://github.com/climate-cache/nyc-forecasts/actions/workflows/nyc_14d_openmeteo.yml/badge.svg)
 
+### A historical archive of hourly 14-day forecasts for New York City, powered by the free Open-Meteo API.
+
 #### Data starts at: 2023-10-01 @ 05:00 EDT
 
 #### Looking for historical weather data from the same source? Check out [Climate Cache: NYC Weather](https://github.com/climate-cache/nyc-weather)
 
 ## Data Notes
-#### *The forecast for 2023-10-05 20:00 is a copy of 2023-10-05 19:00 until I can find the real one. That was before I was using GitHub Actions so it's somewhere on my computer.*
+ The forecast for 2023-10-05 20:00 is a copy of 2023-10-05 19:00 until I can find the real one. That was before I was using GitHub Actions so it's somewhere on my computer.
 ### Formatting
 GitHub Actions grabs data in a more efficient but less readable format, but some of the earlier data
 was grabbed with a Python script so it's formatted normally. This shouldn't cause
@@ -17,6 +19,7 @@ formatting all the incoming data.
 
 ### Source
 Every hour using GitHub Actions, a 14-day hourly forecast *(336hrs)* is taken from open-meteo.com in JSON format and committed to this repository.
+
 ### Variables Recorded
 
 | Variable                    | Description                              | Units                      |
@@ -68,7 +71,7 @@ Every hour using GitHub Actions, a 14-day hourly forecast *(336hrs)* is taken fr
         "time": [
             "2023-10-08T00:00",
             ...
-            "2023-10-08T23:00"
+            "2023-10-21T23:00"
         ],
         "temperature_2m": [
             52.1,
