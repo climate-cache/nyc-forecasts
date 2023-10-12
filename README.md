@@ -2,7 +2,7 @@
 
 ![weather workflow](https://github.com/climate-cache/nyc-forecasts/actions/workflows/nyc_14d_openmeteo.yml/badge.svg)
 
-#### Data starts at: 2023-10-01
+#### Data starts at: 2023-10-01 @ 05:00 EDT
 
 #### Looking for historical weather data from the same source? Check out [Climate Cache: NYC Weather](https://github.com/climate-cache/nyc-weather)
 
